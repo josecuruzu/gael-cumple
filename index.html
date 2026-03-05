@@ -644,13 +644,27 @@
 
 <body>
   <!-- Música de Fondo -->
-  <audio id="bg-music" loop autoplay preload>
+  <audio id="bg-music" loop autoplay>
     <source src="music.mp3" type="audio/mpeg">
   </audio>
 
-  <div class="music-control" id="music-btn" onclick="toggleMusic()">
-    <i id="music-icon" class="fas fa-music"></i>
+  <div class="music-control paused" id="music-btn" onclick="toggleMusic()">
+    <i id="music-icon" class="fas fa-play"></i>
   </div>
+
+  <script>
+    // Intentar reproducir automáticamente al primer clic del usuario
+    document.addEventListener('click', function() {
+      const music = document.getElementById('bg-music');
+      if (music.paused) {
+        music.play();
+        const icon = document.getElementById('music-icon');
+        const btn = document.getElementById('music-btn');
+        icon.classList.replace('fa-play', 'fa-stop');
+        btn.classList.remove('paused');
+      }
+    }, { once: true });
+  </script>
   <div class="bubbles-bg" id="bubbles"></div>
   <div class="page">
 
@@ -848,11 +862,15 @@
       if (music.paused) {
         music.play();
         btn.classList.remove('paused');
-        icon.classList.replace('fa-music', 'fa-pause');
+        if (icon.classList.contains('fa-play')) {
+          icon.classList.replace('fa-play', 'fa-stop');
+        } else {
+          icon.classList.add('fa-stop');
+        }
       } else {
         music.pause();
         btn.classList.add('paused');
-        icon.classList.replace('fa-pause', 'fa-music');
+        icon.classList.replace('fa-stop', 'fa-play');
       }
     }
 
