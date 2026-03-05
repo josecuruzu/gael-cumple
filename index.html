@@ -605,10 +605,52 @@
       font-weight: 400;
       margin-top: 8px;
     }
+    /* Estilos para el botón de música */
+    .music-control {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 1000;
+      background: #4cc9f0;
+      border: 3px solid #fff;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+      animation: pulse-music 2s infinite;
+    }
+
+    @keyframes pulse-music {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+      100% { transform: scale(1); }
+    }
+
+    .music-control i {
+      color: white;
+      font-size: 24px;
+    }
+
+    .music-control.paused {
+      background: #adb5bd;
+      animation: none;
+    }
   </style>
 </head>
 
 <body>
+  <!-- Música de Fondo -->
+  <audio id="bg-music" loop autoplay preload>
+    <source src="music.mp3" type="audio/mpeg">
+  </audio>
+
+  <div class="music-control" id="music-btn" onclick="toggleMusic()">
+    <i id="music-icon" class="fas fa-music"></i>
+  </div>
   <div class="bubbles-bg" id="bubbles"></div>
   <div class="page">
 
@@ -797,6 +839,21 @@
       const s = 10 + Math.random() * 32;
       b.style.cssText = `width:${s}px;height:${s}px;left:${Math.random() * 100}%;animation-duration:${6 + Math.random() * 9}s;animation-delay:${Math.random() * 12}s;opacity:${0.6 + Math.random() * 0.4};`;
       bg.appendChild(b);
+    }
+
+    function toggleMusic() {
+      const music = document.getElementById('bg-music');
+      const btn = document.getElementById('music-btn');
+      const icon = document.getElementById('music-icon');
+      if (music.paused) {
+        music.play();
+        btn.classList.remove('paused');
+        icon.classList.replace('fa-music', 'fa-pause');
+      } else {
+        music.pause();
+        btn.classList.add('paused');
+        icon.classList.replace('fa-pause', 'fa-music');
+      }
     }
 
     function tick() {
