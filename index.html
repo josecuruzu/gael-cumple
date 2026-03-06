@@ -20,6 +20,7 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:ital,wght@0,400;0,600;0,700;1,600;1,700&display=swap"
     rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     * {
       margin: 0;
@@ -652,53 +653,6 @@
     <i id="music-icon" class="fas fa-play"></i>
   </div>
 
-  <script>
-    const music = document.getElementById('bg-music');
-    const btn = document.getElementById('music-btn');
-    const icon = document.getElementById('music-icon');
-
-    // Función unificada para reproducir y actualizar UI
-    function playMusic() {
-      if (music && music.paused) {
-        music.play().then(() => {
-          if (icon) icon.classList.replace('fa-play', 'fa-stop');
-          if (btn) btn.classList.remove('paused');
-          removeEventListeners();
-        }).catch(e => console.error("Error al reproducir:", e));
-      }
-    }
-
-    // Función unificada para pausar y actualizar UI
-    function pauseMusic() {
-      if (music && !music.paused) {
-        music.pause();
-        if (icon) icon.classList.replace('fa-stop', 'fa-play');
-        if (btn) btn.classList.add('paused');
-      }
-    }
-
-    // El botón alterna entre play y pause
-    function toggleMusic() {
-      if (music.paused) {
-        playMusic();
-      } else {
-        pauseMusic();
-      }
-    }
-
-    // Intentar sonar al cargar (casi siempre bloqueado, pero se intenta)
-    window.addEventListener('load', playMusic);
-
-    // ACTIVADOR GLOBAL: Suena al primer clic, toque o scroll del usuario
-    const events = ['click', 'touchstart', 'scroll', 'mousedown'];
-    function removeEventListeners() {
-      events.forEach(event => document.removeEventListener(event, playMusic));
-      window.removeEventListener('scroll', playMusic);
-    }
-
-    events.forEach(event => document.addEventListener(event, playMusic, { once: true }));
-    window.addEventListener('scroll', playMusic, { once: true });
-  </script>
   <div class="bubbles-bg" id="bubbles"></div>
   <div class="page">
 
@@ -889,18 +843,43 @@
       bg.appendChild(b);
     }
 
+    const music = document.getElementById('bg-music');
+    const btn = document.getElementById('music-btn');
+    const icon = document.getElementById('music-icon');
+
+    function playMusic() {
+      if (music && music.paused) {
+        music.play().then(() => {
+          btn.classList.remove('paused');
+          icon.classList.replace('fa-play', 'fa-stop');
+          removeTriggers();
+        }).catch(e => {
+          // Si falla (por ejemplo, el navegador bloquea el scroll como interacción válida en ciertos casos), 
+          // se mantiene el listener para el siguiente evento.
+          console.log("Reproducción pendiente de interacción directa:", e);
+        });
+      }
+    }
+
+    function removeTriggers() {
+      ['scroll', 'click', 'touchstart', 'mousedown', 'keydown'].forEach(e => {
+        window.removeEventListener(e, playMusic);
+        document.removeEventListener(e, playMusic);
+      });
+    }
+
+    // Forzar el inicio de la música con el primer scroll o cualquier otra interacción
+    ['scroll', 'click', 'touchstart', 'mousedown', 'keydown'].forEach(e => {
+      window.addEventListener(e, playMusic, { once: true, passive: true });
+      document.addEventListener(e, playMusic, { once: true, passive: true });
+    });
+
     function toggleMusic() {
-      const music = document.getElementById('bg-music');
-      const btn = document.getElementById('music-btn');
-      const icon = document.getElementById('music-icon');
       if (music.paused) {
         music.play();
         btn.classList.remove('paused');
-        if (icon.classList.contains('fa-play')) {
-          icon.classList.replace('fa-play', 'fa-stop');
-        } else {
-          icon.classList.add('fa-stop');
-        }
+        icon.classList.replace('fa-play', 'fa-stop');
+        removeTriggers();
       } else {
         music.pause();
         btn.classList.add('paused');
